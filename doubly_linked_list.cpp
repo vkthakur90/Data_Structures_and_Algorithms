@@ -133,6 +133,14 @@ void traverse(const std::unique_ptr<Node>& head) {
     std::cout << "null\n";
 }
 
+// Cleanup: Iteratively clean up the list to prevent recursive destruction.
+void cleanup(std::unique_ptr<Node>& head) {
+    while (head) {
+        // Move to the next node, releasing the current node.
+        head = std::move(head->next);
+    }
+}
+
 int main() {
     std::unique_ptr<Node> head = nullptr;
     
@@ -167,6 +175,11 @@ int main() {
     // Reverse the list.
     reverse(head);
     std::cout << "After reversing the list:\n";
+    traverse(head);
+    
+    // Cleanup the list to prevent recursive destruction.
+    cleanup(head);
+    std::cout << "\nAfter cleanup, list traversal:\n";
     traverse(head);
     
     return 0;
