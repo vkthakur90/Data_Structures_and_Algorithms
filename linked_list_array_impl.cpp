@@ -27,13 +27,19 @@ void LinkedList_init(LinkedList &list, const size_t &N) {
     list.free_node_stack.allocated = std::make_unique<bool[]>(N);
     list.free_node_stack.free_head = 0; // Free list starts at index 0
 
-    for (size_t i = 0; i < N; ++i) {
+    // Assuming N is the total number of nodes.
+    for (size_t i = 0; i < N; ++i) 
         list.free_node_stack.nodes.data[i] = 0.0f;
+
+    for (size_t i = 0; i < N; ++i)
         list.free_node_stack.nodes.next[i] = -1;
+
+    for (size_t i = 0; i < N; ++i)
         list.free_node_stack.allocated[i] = false;
-        // Link free nodes in order: node i points to i+1, last node points to -1.
+
+    for (size_t i = 0; i < N; ++i)
         list.free_node_stack.next_free[i] = (i < N - 1) ? static_cast<int>(i + 1) : -1;
-    }
+
 }
 
 // Allocate a node by "popping" from the free stack.
@@ -63,10 +69,12 @@ void LinkedList_deallocateNode(LinkedList &list, const size_t &idx) {
         std::cerr << "Error: Index out of bounds in deallocation." << std::endl;
         return;
     }
+    
     if (!list.free_node_stack.allocated[idx]) {
         std::cerr << "Error: Node " << idx << " is already deallocated." << std::endl;
         return;
     }
+    
     // Reset node's value and next pointer.
     list.free_node_stack.nodes.data[idx] = 0.0f;
     list.free_node_stack.nodes.next[idx] = -1;
@@ -127,15 +135,18 @@ void LinkedList_insertAfter(LinkedList &list, int node_idx, const float &value) 
 
 // Search for the first node containing the specified value.
 // Returns the node index if found, otherwise returns -1.
-int LinkedList_search(LinkedList &list, const float &value) {
+void LinkedList_search(LinkedList &list, const float &value, int &result) {
     int current = list.head;
     while (current != -1) {
-        if (list.free_node_stack.nodes.data[current] == value)
-            return current;
+        if (list.free_node_stack.nodes.data[current] == value) {
+            result = current;
+            return;
+        }
         current = list.free_node_stack.nodes.next[current];
     }
-    return -1;
+    result = -1;
 }
+
 
 // Delete the first node found that contains the specified value.
 void LinkedList_delete(LinkedList &list, const float &value) {
@@ -193,7 +204,8 @@ int main() {
     LinkedList_print(list);  // Expected: 0.0 1.1 2.2 3.3
     
     // Insert a value after the node with value 1.1.
-    int pos = LinkedList_search(list, 1.1f);
+    int pos;
+    LinkedList_search(list, 1.1f, pos);
     if (pos != -1)
         LinkedList_insertAfter(list, pos, 1.5f);
     LinkedList_print(list);  // Expected: 0.0 1.1 1.5 2.2 3.3
